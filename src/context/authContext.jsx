@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState, useRef } from "react";
 import { supabase } from "../backend/Supabase-client";
 import toast from "react-hot-toast";
 
@@ -11,14 +11,17 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
 
-  useEffect(() => {
-    let initialLoad = true;
+  // Keep track of previous user to detect *real* login/logout
+  const prevUserRef = useRef(null);
 
+  useEffect(() => {
     const initSession = async () => {
       const {
         data: { session },
       } = await supabase.auth.getSession();
+
       setUser(session?.user ?? null);
+      prevUserRef.current = session?.user ?? null; // store initial user
       setLoading(false);
     };
 
@@ -26,21 +29,22 @@ export const AuthProvider = ({ children }) => {
 
     const { data: listener } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        setUser(session?.user ?? null);
+        const currentUser = session?.user ?? null;
 
-        // ✅ Only toast for actual login/logout, not restore
-        if (event === "SIGNED_IN" && !initialLoad) {
+        // Check transitions
+        if (!prevUserRef.current && currentUser) {
+          // User was null, now logged in
           toast.success("Signed in successfully!");
           setIsLoginOpen(false);
-        }
-
-        if (event === "SIGNED_OUT") {
+        } else if (prevUserRef.current && !currentUser) {
+          // User was logged in, now logged out
           toast.success("Signed out successfully!");
         }
+
+        setUser(currentUser);
+        prevUserRef.current = currentUser; // update last known user
       }
     );
-
-    initialLoad = false;
 
     return () => {
       listener.subscription.unsubscribe();
@@ -60,7 +64,6 @@ export const AuthProvider = ({ children }) => {
           },
         },
       });
-
       if (error) throw error;
     } catch (err) {
       console.error("Google sign-in error:", err);
@@ -68,7 +71,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // 🔹 Sign-out (toast handled by listener)
+  // 🔹 Sign-out
   const signOut = async () => {
     try {
       await supabase.auth.signOut();
