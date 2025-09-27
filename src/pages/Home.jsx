@@ -8,12 +8,12 @@ import debounce from "lodash.debounce";
 const HeroSection = ({ onSearchChange }) => (
   <section className="relative w-full sm:h-[80vh] min-h-[50vh] sm:flex items-center justify-center overflow-hidden">
     <BackgroundBeamsWithCollision>
-      <div className="text-center px-2">
+      <div className="text-center px-4">
         <motion.h2
           initial={{ opacity: 0, y: -30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
-          className="text-5xl sm:text-7xl lg:text-8xl font-black mb-5 text-center 
+          className="text-4xl sm:text-7xl lg:text-8xl font-black mb-5 text-center 
             bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent leading-tight"
         >
           Welcome to Islamic.forum
@@ -22,7 +22,7 @@ const HeroSection = ({ onSearchChange }) => (
           initial={{ opacity: 0, y: -30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, ease: "easeOut" }}
-          className="mt-2 mb-5 sm:mb-10 text-lg sm:text-xl text-zinc-400"
+          className="mt-2 mb-5 sm:mb-10 text-sm sm:text-xl text-zinc-400"
         >
           A global community for thoughtful discussion and learning.
         </motion.p>
@@ -95,7 +95,7 @@ const Home = () => {
   };
 
   return (
-    <main className="pt-0 sm:pt-0 px-4 sm:px-6 lg:px-7 max-w-screen mx-auto">
+    <main className="sm:px-6 lg:px-7 max-w-screen mx-auto">
       <HeroSection onSearchChange={handleChange} />
       <PostsSection query={query} isSearch={isSearch} />
     </main>
