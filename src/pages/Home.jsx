@@ -8,7 +8,7 @@ import debounce from "lodash.debounce";
 const HeroSection = ({ onSearchChange }) => (
   <section className="relative w-full sm:h-[80vh] min-h-[50vh] sm:flex items-center justify-center overflow-hidden">
     <BackgroundBeamsWithCollision>
-      <div className="text-center px-4">
+      <div className="text-center px-2">
         <motion.h2
           initial={{ opacity: 0, y: -30 }}
           animate={{ opacity: 1, y: 0 }}
