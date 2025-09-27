@@ -12,6 +12,8 @@ export const AuthProvider = ({ children }) => {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
 
   useEffect(() => {
+    let initialLoad = true;
+
     const initSession = async () => {
       const {
         data: { session },
@@ -23,20 +25,29 @@ export const AuthProvider = ({ children }) => {
     initSession();
 
     const { data: listener } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
+      (event, session) => {
         setUser(session?.user ?? null);
-        if (session?.user) {
+
+        // ✅ Only toast for actual login/logout, not restore
+        if (event === "SIGNED_IN" && !initialLoad) {
           toast.success("Signed in successfully!");
-          setIsLoginOpen(false); // close modal after login
+          setIsLoginOpen(false);
+        }
+
+        if (event === "SIGNED_OUT") {
+          toast.success("Signed out successfully!");
         }
       }
     );
+
+    initialLoad = false;
 
     return () => {
       listener.subscription.unsubscribe();
     };
   }, []);
 
+  // 🔹 Google Sign-in
   const signInWithGoogle = async () => {
     try {
       const { error } = await supabase.auth.signInWithOAuth({
@@ -57,11 +68,17 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // 🔹 Sign-out (toast handled by listener)
   const signOut = async () => {
-    await supabase.auth.signOut();
-    toast.success("Signed out successfully!");
+    try {
+      await supabase.auth.signOut();
+    } catch (err) {
+      console.error("Sign-out error:", err);
+      toast.error("Failed to sign out");
+    }
   };
 
+  // 🔹 Modal controls
   const openLogin = () => setIsLoginOpen(true);
   const closeLogin = () => setIsLoginOpen(false);
 
